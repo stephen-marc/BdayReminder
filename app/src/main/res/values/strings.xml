@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">BdayReminder</string>
+    <string name="cd_add_new_birthday">Add new birthdate</string>
+    <string name="cd_navigate_up">Navigate back</string>
+    <string name="add_birthday_screen_title">Add Birthday</string>
+    <string name="add_birthday_name_lable">Name</string>
+    <string name="day_label">Day</string>
+    <string name="year_label">Year</string>
+    <string name="empty_day" />
+    <string name="month_label">Month</string>
+    <string name="birthday_category">Category</string>
+</resources>
