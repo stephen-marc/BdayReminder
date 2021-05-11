@@ -37,43 +37,54 @@ fun AddBirthdayScreen(addBirthdayViewModel: AddBirthDayViewModel = getStateViewM
 
     Scaffold(
         topBar = { AddBirthdayTopBar() },
-        floatingActionButton = { AddFloatingActionButton(addBirthdayViewModel::saveEntry) }) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            TextFieldWithError(state.name, addBirthdayViewModel::updateName)
+        floatingActionButton = { AddFloatingActionButton(addBirthdayViewModel::saveEntry) },
+        content = { BirthdayInformationComponent(addBirthdayViewModel) }
+    )
+}
 
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                DaySelectionDropDown(
-                    modifier = Modifier.weight(2f),
-                    dayModel,
-                    addBirthdayViewModel::updateDay
-                )
-                MonthSelectionDropDown(
-                    modifier = Modifier.weight(3f),
-                    dayModel,
-                    addBirthdayViewModel::updateMonth
-                )
-                OutlinedTextField(
-                    modifier = Modifier.weight(3f),
-                    label = { Text(text = stringResource(id = R.string.year_label)) },
-                    value = state.name.value,
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    onValueChange = addBirthdayViewModel::updateName
-                )
-            }
+@Composable
+fun BirthdayInformationComponent(
+    addBirthdayViewModel: AddBirthDayViewModel = getStateViewModel()
+) {
+    val state by addBirthdayViewModel.viewState.collectAsState()
+    val nameState = state.name
+    val dayModel = state.day
 
-            CategorySelectionDropDown(
-                modifier = Modifier.fillMaxWidth(5f / 8f),
-                selectedCategory = state.selectedCategory,
-                state.availableCategories,
-                onCategoryClick = addBirthdayViewModel::updateCategory
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        TextFieldWithError(state.name, addBirthdayViewModel::updateName)
+
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            DaySelectionDropDown(
+                modifier = Modifier.weight(2f),
+                dayModel,
+                addBirthdayViewModel::updateDay
+            )
+            MonthSelectionDropDown(
+                modifier = Modifier.weight(3f),
+                dayModel,
+                addBirthdayViewModel::updateMonth
+            )
+            OutlinedTextField(
+                modifier = Modifier.weight(3f),
+                label = { Text(text = stringResource(id = R.string.year_label)) },
+                value = state.name.value,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                onValueChange = addBirthdayViewModel::updateName
             )
         }
+
+        CategorySelectionDropDown(
+            modifier = Modifier.fillMaxWidth(5f / 8f),
+            selectedCategory = state.selectedCategory,
+            state.availableCategories,
+            onCategoryClick = addBirthdayViewModel::updateCategory
+        )
     }
 }
 

@@ -1,5 +1,5 @@
 object Compose {
-    val version = "1.0.0-beta04"
+    val version = "1.0.0-beta06"
 
     val ui = "androidx.compose.ui:ui:$version"
     val material = "androidx.compose.material:material:$version"
@@ -18,7 +18,7 @@ object SqlDelight {
 
     val gradlePlugin = "com.squareup.sqldelight:gradle-plugin:$version"
     val androidDriver = "com.squareup.sqldelight:android-driver:$version"
-    val coroutineExt =  "com.squareup.sqldelight:coroutines-extensions-jvm:$version"
+    val coroutineExt = "com.squareup.sqldelight:coroutines-extensions-jvm:$version"
 }
 
 
