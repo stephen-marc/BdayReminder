@@ -9,4 +9,5 @@
     <string name="empty_day" />
     <string name="month_label">Month</string>
     <string name="birthday_category">Category</string>
+    <string name="cd_create_birthday_entry">Saved new birthday entry</string>
 </resources>

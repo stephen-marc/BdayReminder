@@ -1,5 +1,7 @@
 package dev.prochnow.bdayreminder
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -10,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -25,40 +28,39 @@ import org.koin.androidx.compose.getStateViewModel
 import java.time.Month
 import java.time.format.TextStyle
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AddBirthdayScreen(addBirthdayViewModel: AddBirthDayViewModel = getStateViewModel()) {
     val state by addBirthdayViewModel.viewState.collectAsState()
+    val nameState = state.name
+    val dayModel = state.day
 
-    Scaffold(topBar = { AddBirthdayTopBar() }) {
+    Scaffold(
+        topBar = { AddBirthdayTopBar() },
+        floatingActionButton = { AddFloatingActionButton(addBirthdayViewModel::saveEntry) }) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(text = stringResource(id = R.string.add_birthday_name_lable)) },
-                value = state.name,
-                singleLine = true,
-                onValueChange = addBirthdayViewModel::updateName
-            )
+            TextFieldWithError(state.name, addBirthdayViewModel::updateName)
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 DaySelectionDropDown(
                     modifier = Modifier.weight(2f),
-                    state.dayString ?: stringResource(id = R.string.empty_day),
+                    dayModel,
                     addBirthdayViewModel::updateDay
                 )
                 MonthSelectionDropDown(
                     modifier = Modifier.weight(3f),
-                    state.month,
+                    dayModel,
                     addBirthdayViewModel::updateMonth
                 )
                 OutlinedTextField(
                     modifier = Modifier.weight(3f),
                     label = { Text(text = stringResource(id = R.string.year_label)) },
-                    value = state.name,
+                    value = state.name.value,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     onValueChange = addBirthdayViewModel::updateName
@@ -75,11 +77,53 @@ fun AddBirthdayScreen(addBirthdayViewModel: AddBirthDayViewModel = getStateViewM
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun TextFieldWithError(
+    nameState: ValidatorModel,
+    onTextChange: (String) -> Unit,
+    interactionSource: MutableInteractionSource = MutableInteractionSource(),
+    readOnly: Boolean = false,
+    singleLine: Boolean = false,
+    label: @Composable (() -> Unit)? = null,
+) {
+    Column() {
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            label = label,
+            value = nameState.value,
+            singleLine = singleLine,
+            isError = nameState.showError,
+            onValueChange = onTextChange,
+            interactionSource = interactionSource,
+            readOnly = readOnly,
+        )
+        AnimatedVisibility(visible = nameState.showError) {
+            Text(
+                text = nameState.getErrors(),
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colors.error
+            )
+        }
+
+    }
+}
+
+@Composable
+fun AddFloatingActionButton(onSaveEntryClick: () -> Unit) {
+    FloatingActionButton(onClick = onSaveEntryClick) {
+        Icon(
+            imageVector = Icons.Filled.Done,
+            contentDescription = stringResource(id = R.string.cd_create_birthday_entry)
+        )
+    }
+}
+
 @Composable
 fun DropDownComponent(
     modifier: Modifier = Modifier,
     label: String = "",
-    selectionText: String = "",
+    selectionText: ValidatorModel,
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     onDropDownClick: () -> Unit,
@@ -98,13 +142,13 @@ fun DropDownComponent(
     }
 
     Column(modifier = modifier) {
-        OutlinedTextField(
-            modifier = Modifier,
-            value = selectionText,
+        TextFieldWithError(
+            nameState = selectionText,
+            onTextChange = {},
+            interactionSource = interactionSource,
             label = { Text(text = label) },
-            onValueChange = {},
             readOnly = true,
-            interactionSource = interactionSource
+            singleLine = true
         )
         DropdownMenu(
             modifier = Modifier.heightIn(100.dp, 240.dp),
@@ -121,7 +165,7 @@ fun DropDownComponent(
 @Composable
 fun DaySelectionDropDown(
     modifier: Modifier,
-    selectedValue: String,
+    selectedValue: ValidatorModel,
     onItemClick: (Int) -> Unit,
     menuContent: @Composable ((Int) -> Unit) = {
         Text(text = it.toString())
@@ -210,7 +254,7 @@ fun CategorySelectionDropDown(
 @Composable
 fun MonthSelectionDropDown(
     modifier: Modifier,
-    selectedMonth: Month?,
+    selectedMonth: ValidatorModel,
     onItemClick: (Month) -> Unit,
     menuContent: @Composable ((Month) -> Unit) = { month ->
         Text(
@@ -221,7 +265,7 @@ fun MonthSelectionDropDown(
     var expanded by remember { mutableStateOf(false) }
     DropDownComponent(
         modifier = modifier,
-        selectionText = selectedMonth?.localizedName(Locale.current) ?: "",
+        selectionText = selectedMonth,
         label = stringResource(id = R.string.month_label),
         expanded = expanded,
         onDismissRequest = { expanded = false },
