@@ -13,7 +13,7 @@ sealed class LocalizedString {
 
     data class ResourceString(
         @StringRes val resourceId: Int,
-        val args: List<Any>
+        val args: List<Any> = emptyList()
     ) : LocalizedString()
 
     data class QuantityResourceString(

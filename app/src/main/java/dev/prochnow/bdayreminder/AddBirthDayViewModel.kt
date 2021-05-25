@@ -6,10 +6,8 @@ import arrow.optics.optics
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.prochnow.bdayreminder.interactor.BirthdateInteractor
 import dev.prochnow.bdayreminder.ui.LocalizedString
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -30,6 +28,9 @@ class AddBirthDayViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(AddBirthdayModel())
     val viewState: StateFlow<AddBirthdayModel> = _state
+
+    private val _eventChannel = Channel<Event>(Channel.BUFFERED)
+    val eventsFlow = _eventChannel.receiveAsFlow()
 
     private val _nameModel = MutableStateFlow(NameModel())
 
@@ -128,8 +129,10 @@ class AddBirthDayViewModel @Inject constructor(
                 birthdateInteractor.saveEntry(
                     name = _nameModel.value.value.stringValue,
                     date = date,
-                    category = _categoryModel.value.selectedColorCategory.name.toString()
+                    category = _categoryModel.value.selectedColorCategory.categoryModel.name
                 )
+                _eventChannel.send(Event.EntryCreated)
+                _eventChannel.send(Event.ShowSnackBar(LocalizedString.ResourceString(R.string.entry_created)))
             }
         }
     }
@@ -143,7 +146,13 @@ class AddBirthDayViewModel @Inject constructor(
         _nameModel.value = NameModel()
         _categoryModel.value = CategorySelectionModel()
     }
+
+    sealed class Event {
+        object EntryCreated : Event()
+        data class ShowSnackBar(val message: LocalizedString) : Event()
+    }
 }
+
 
 enum class CategoryModel {
     NONE, FAMILY, FRIENDS, WORK

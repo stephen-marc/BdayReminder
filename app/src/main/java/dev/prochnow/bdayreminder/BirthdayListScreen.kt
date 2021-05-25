@@ -6,19 +6,21 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import dev.prochnow.bdayreminder.ui.components.AddBirthdayComponent
+import dev.prochnow.bdayreminder.ui.get
 import dev.prochnow.bdayreminder.ui.theme.CategoryTheme
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Month
@@ -26,12 +28,21 @@ import java.time.format.TextStyle
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class)
 @Composable
-fun BirthdayListScreen(addBirthdayViewModel: AddBirthDayViewModel = hiltViewModel()) {
-    val state by addBirthdayViewModel.viewState.collectAsState()
+fun BirthdayListScreen(addBirthdayViewModel: AddBirthDayViewModel) {
+    val scaffoldState = rememberScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(
         ModalBottomSheetValue.Hidden
     )
-    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    val state by addBirthdayViewModel.viewState.collectAsState()
+
+    val onShowSnackbar: (String) -> Unit = {
+        coroutineScope.launch {
+            scaffoldState.snackbarHostState.showSnackbar(message = it)
+        }
+    }
     val bottomSheetToggle: () -> Unit = {
         coroutineScope.launch {
             addBirthdayViewModel.resetEntry()
@@ -43,14 +54,17 @@ fun BirthdayListScreen(addBirthdayViewModel: AddBirthDayViewModel = hiltViewMode
         }
     }
 
-    val onCreateEntryClicked: () -> Unit = {
-        addBirthdayViewModel.saveEntry()
-    }
+    addBirthdayViewModel.eventsFlow.onEach { event ->
+        when (event) {
+            AddBirthDayViewModel.Event.EntryCreated -> sheetState.hide()
+            is AddBirthDayViewModel.Event.ShowSnackBar -> onShowSnackbar(event.message.get(context))
+        }
+    }.launchIn(coroutineScope)
 
     ModalBottomSheetLayout(
         sheetContent = {
             AddBirthdaySheetComponent(
-                onCreateEntryClicked = onCreateEntryClicked,
+                onCreateEntryClicked = addBirthdayViewModel::saveEntry,
                 onNameChange = addBirthdayViewModel::updateName,
                 nameModel = state.name,
                 timeModel = state.time,
@@ -66,6 +80,7 @@ fun BirthdayListScreen(addBirthdayViewModel: AddBirthDayViewModel = hiltViewMode
         sheetState = sheetState
     ) {
         Scaffold(
+            scaffoldState = scaffoldState,
             topBar = { AddBirthdayTopBar() },
             floatingActionButton = {
                 AddFloatingActionButton(
@@ -138,19 +153,11 @@ fun AddFloatingActionButton(
 
 
 @Composable
-fun AddBirthdayTopBar(onNavigateBackClicked: () -> Unit = { /*TODO*/ }) {
+fun AddBirthdayTopBar() {
     val topBarBackground = MaterialTheme.colors.primary
     TopAppBar(
-        title = { Text(text = stringResource(id = R.string.add_birthday_screen_title)) },
+        title = { Text(text = stringResource(id = R.string.app_name)) },
         backgroundColor = topBarBackground,
-        navigationIcon = {
-            IconButton(onClick = onNavigateBackClicked) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = stringResource(id = R.string.cd_navigate_up),
-                )
-            }
-        },
     )
 }
 

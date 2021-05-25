@@ -67,6 +67,9 @@ dependencies {
     implementation(Coil.core)
     implementation(SqlDelight.coroutineExt)
     implementation(SqlDelight.androidDriver)
+
+    implementation("com.facebook.stetho:stetho:1.5.1")
+
     implementation("com.google.dagger:hilt-android:2.35")
     kapt("com.google.dagger:hilt-android-compiler:2.35")
 

@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -26,7 +27,8 @@ class MainActivity : AppCompatActivity() {
                     startDestination = Screen.MainScreen.route()
                 ) {
                     composable(Screen.MainScreen.route()) {
-                        BirthdayListScreen()
+                        val addBirthDayViewModel: AddBirthDayViewModel = hiltViewModel(it)
+                        BirthdayListScreen(addBirthDayViewModel)
                     }
                 }
             }
