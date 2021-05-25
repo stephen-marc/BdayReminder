@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import dev.prochnow.bdayreminder.AddBirthDayViewModel
 import dev.prochnow.bdayreminder.ColorCategoryModel
 import dev.prochnow.bdayreminder.R
-import dev.prochnow.bdayreminder.get
+import dev.prochnow.bdayreminder.ui.get
 import dev.prochnow.bdayreminder.ui.theme.CategoryTheme
 import kotlinx.coroutines.flow.collect
 

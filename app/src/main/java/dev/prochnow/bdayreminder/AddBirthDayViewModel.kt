@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import arrow.optics.optics
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.prochnow.bdayreminder.interactor.BirthdateInteractor
+import dev.prochnow.bdayreminder.ui.LocalizedString
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect

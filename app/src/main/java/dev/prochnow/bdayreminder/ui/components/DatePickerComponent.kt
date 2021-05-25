@@ -13,7 +13,7 @@ import com.vanpra.composematerialdialogs.buttons
 import com.vanpra.composematerialdialogs.datetime.datepicker.datepicker
 import dev.prochnow.bdayreminder.AddBirthDayViewModel
 import dev.prochnow.bdayreminder.R
-import dev.prochnow.bdayreminder.get
+import dev.prochnow.bdayreminder.ui.get
 import java.time.LocalDate
 
 

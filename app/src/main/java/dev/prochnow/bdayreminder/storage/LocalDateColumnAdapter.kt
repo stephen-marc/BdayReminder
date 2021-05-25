@@ -1,4 +1,4 @@
-package dev.prochnow.bdayreminder
+package dev.prochnow.bdayreminder.storage
 
 import com.squareup.sqldelight.ColumnAdapter
 import java.time.LocalDate

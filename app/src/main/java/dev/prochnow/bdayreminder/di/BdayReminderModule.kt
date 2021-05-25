@@ -1,4 +1,4 @@
-package dev.prochnow.bdayreminder
+package dev.prochnow.bdayreminder.di
 
 import android.content.Context
 import com.squareup.sqldelight.android.AndroidSqliteDriver
@@ -8,7 +8,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dev.prochnow.bdayreminder.Birthday
+import dev.prochnow.bdayreminder.BirthdaysQueries
+import dev.prochnow.bdayreminder.Database
 import dev.prochnow.bdayreminder.domain.store.BirthdayDataStore
+import dev.prochnow.bdayreminder.storage.LocalDateColumnAdapter
 import dev.prochnow.bdayreminder.storage.SqlBirthdateDataStore
 
 @Module

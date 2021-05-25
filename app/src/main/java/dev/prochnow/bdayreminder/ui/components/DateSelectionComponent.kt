@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import arrow.optics.optics
 import dev.prochnow.bdayreminder.*
 import dev.prochnow.bdayreminder.R
+import dev.prochnow.bdayreminder.ui.LocalizedString
+import dev.prochnow.bdayreminder.ui.get
 import java.time.Month
 
 @optics

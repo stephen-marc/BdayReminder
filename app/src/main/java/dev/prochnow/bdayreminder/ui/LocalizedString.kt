@@ -1,4 +1,4 @@
-package dev.prochnow.bdayreminder
+package dev.prochnow.bdayreminder.ui
 
 import android.content.Context
 import android.widget.TextView
