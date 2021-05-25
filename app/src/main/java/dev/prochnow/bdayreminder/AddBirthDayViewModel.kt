@@ -1,22 +1,23 @@
 package dev.prochnow.bdayreminder
 
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import arrow.optics.optics
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import timber.log.Timber
-import java.time.Month
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 val CATEGORIES = listOf(
-    CategoryModel("None", Color.Gray),
-    CategoryModel("Family", Color.Blue),
-    CategoryModel("Friends", Color.Red),
-    CategoryModel("Work", Color.Green),
+    ColorCategoryModel(LocalizedString.RawString("None"), CategoryModel.NONE),
+    ColorCategoryModel(LocalizedString.RawString("Family"), CategoryModel.FAMILY),
+    ColorCategoryModel(LocalizedString.RawString("Friends"), CategoryModel.FRIENDS),
+    ColorCategoryModel(LocalizedString.RawString("Work"), CategoryModel.WORK),
 )
 
 class AddBirthDayViewModel(
@@ -28,96 +29,124 @@ class AddBirthDayViewModel(
 
     private val _nameModel = MutableStateFlow(NameModel())
 
-    private val _dayModel = MutableStateFlow(DayModel())
+    private val _timeModel = MutableStateFlow(TimeModel())
+
+    private val _categoryModel = MutableStateFlow(CategorySelectionModel())
 
     init {
-        state.get<AddBirthdayModel>("state")?.run { _state.value = this }
-
         viewModelScope.launch {
-            _nameModel.combine(_dayModel) { name, day ->
-                AddBirthdayModel(name, day)
-            }.collect { _state.value = it }
+            combine(_nameModel, _timeModel, _categoryModel, ::AddBirthdayModel).collect {
+                _state.value = it
+            }
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        state.set("state", _state.value)
+    @optics
+    data class NameModel(
+        override val value: LocalizedString.RawString = LocalizedString.RawString(""),
+        override val validate: Boolean = false
+    ) : Validatable<LocalizedString> {
+        override val isValid: Boolean
+            get() = value.stringValue.isNotEmpty()
+
+        override val errors: LocalizedString
+            get() = when {
+                value.stringValue.isEmpty() -> LocalizedString.resource(R.string.error_required)
+                else -> LocalizedString.empty()
+            }
+
+        companion object
     }
 
-
-    data class NameModel(override val value: String = "", override val validate: Boolean = false) :
-        ValidatorModel(value, validate, validator = ::validatorForName, errorFor = ::errorForName)
-
-    data class DayModel(override val value: String = "", override val validate: Boolean = false) :
-        ValidatorModel(value, validate, validator = ::validatorForName, errorFor = ::errorForName)
 
     data class AddBirthdayModel(
         val name: NameModel = NameModel(),
-        val day: DayModel = DayModel(),
-        val month: Month? = null,
-        val year: String? = null,
-        val availableCategories: List<CategoryModel> = CATEGORIES,
-        val selectedCategory: CategoryModel = CATEGORIES.first(),
-        val validate: Boolean = false,
+        val time: TimeModel = TimeModel(),
+        val category: CategorySelectionModel = CategorySelectionModel()
     )
 
+    @optics
+    data class CategorySelectionModel(
+        val availableCategories: List<ColorCategoryModel> = CATEGORIES,
+        val selectedColorCategory: ColorCategoryModel = CATEGORIES.first(),
+    ) {
+        companion object
+    }
+
+    @optics
+    data class TimeModel(
+        val date: LocalDate? = null,
+        override val validate: Boolean = false
+    ) : Validatable<LocalizedString> {
+        override val isValid: Boolean
+            get() = date?.isAfter(LocalDate.now())?.not() ?: false
+        override val errors: LocalizedString
+            get() = when {
+                date == null -> LocalizedString.resource(R.string.error_required)
+                date.isAfter(LocalDate.now()) -> LocalizedString.resource(R.string.error_future_birthdate)
+                else -> LocalizedString.empty()
+            }
+        override val value: LocalizedString
+            get() = LocalizedString.RawString(
+                date?.format(
+                    DateTimeFormatter.ofLocalizedDate(
+                        FormatStyle.MEDIUM
+                    )
+                ) ?: ""
+            )
+
+        companion object
+    }
+
     fun updateName(newValue: String) {
-        _nameModel.value = _nameModel.value.copy(value = newValue)
+        _nameModel.value =
+            NameModel.value.set(_nameModel.value, LocalizedString.RawString(newValue))
     }
 
-    fun updateDay(newValue: Int) {
-        _dayModel.value = _dayModel.value.copy(value = newValue.toString())
+    fun updateDate(newValue: LocalDate) {
+        _timeModel.update { TimeModel.date.set(this, newValue) }
     }
 
-    fun updateMonth(newValue: Month) {
-        _state.value = _state.value.copy(month = newValue)
-    }
-
-    fun updateCategory(newValue: CategoryModel) {
-        _state.value = _state.value.copy(selectedCategory = newValue)
+    fun updateCategory(newValue: ColorCategoryModel) {
+        _categoryModel.update { CategorySelectionModel.selectedColorCategory.set(this, newValue) }
     }
 
     fun saveEntry() {
-        _nameModel.value = _nameModel.value.copy(validate = true)
-        _dayModel.value = _dayModel.value.copy(validate = true)
-        if (_nameModel.value.isValid) {
-            Timber.d("Is valid")
+        _nameModel.update {
+            NameModel.validate.set(this, true)
         }
+        _timeModel.update {
+            TimeModel.validate.set(this, true)
+        }
+//        _timeModel.update {
+////            TimeModel.day.validate.set(
+////                this, true
+////            ).run {
+////                TimeModel.month.validate.set(this, true)
+////            }
+//        }
     }
 }
 
-data class ValidationError(
-    val stringRes: Int
+enum class CategoryModel {
+    NONE, FAMILY, FRIENDS, WORK
+}
+
+
+data class ColorCategoryModel(
+    val name: LocalizedString,
+    val categoryModel: CategoryModel
 )
 
-
-data class CategoryModel(
-    val name: String,
-    val color: Color
-)
-
-abstract class ValidatorModel(
-    open val value: String,
-    open val validate: Boolean,
-    private val validator: (String) -> Boolean = { true },
-    private val errorFor: (String) -> String = { "" }
-) {
+interface Validatable<T> {
+    val value: T
     val isValid: Boolean
-        get() = validator(value)
-    val showError: Boolean
-        get() = validate && !isValid
-
-    fun getErrors(): String {
-        return if (!isValid) {
-            errorFor(value)
-        } else {
-            ""
-        }
-    }
+    val isError: Boolean
+        get() = !isValid && validate
+    val validate: Boolean
+    val errors: LocalizedString
 }
 
-private fun validatorForName(text: String): Boolean = text.isNotBlank()
-
-
-private fun errorForName(text: String): String = "Name is required"
+fun <T> MutableStateFlow<T>.update(update: T.() -> T) {
+    this.value = this.value.update()
+}

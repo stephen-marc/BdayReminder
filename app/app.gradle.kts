@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("com.squareup.sqldelight")
+    id("kotlin-kapt")
 }
 
 android {
@@ -18,7 +19,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildFeatures{
+    buildFeatures {
         compose = true
     }
 
@@ -29,7 +30,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -39,6 +43,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
         useIR = true
+        freeCompilerArgs = freeCompilerArgs + "-Xallow-jvm-ir-dependencies"
     }
 }
 
@@ -63,6 +68,9 @@ dependencies {
     implementation(Koin.androidExt)
     implementation(Koin.coreAndroid)
     implementation(Koin.compose)
+    implementation("io.github.vanpra.compose-material-dialogs:datetime:0.4.1")
+    implementation("io.arrow-kt:arrow-optics:0.13.2")
+    kapt("io.arrow-kt:arrow-meta:0.13.2")
     testImplementation(Junit.junit4)
     androidTestImplementation(AndroidX.Test.junit)
     androidTestImplementation(AndroidX.Test.espresso)

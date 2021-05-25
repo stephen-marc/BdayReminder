@@ -1,8 +1,6 @@
 package dev.prochnow.bdayreminder.navigation
 
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.navigate
-import java.util.*
 
 sealed class Screen(val identifier: String) {
     open fun route(): String = identifier
@@ -12,7 +10,7 @@ sealed class Screen(val identifier: String) {
 
 class Actions(navController: NavHostController) {
     val openMainScreen: () -> Unit = {
-        navController.navigate(Screen.MainScreen.route())
+//        navController.navigate(Screen.MainScreen.route())
     }
 }
 

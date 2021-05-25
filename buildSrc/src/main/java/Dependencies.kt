@@ -1,5 +1,5 @@
 object Compose {
-    val version = "1.0.0-beta06"
+    val version = "1.0.0-beta07"
 
     val ui = "androidx.compose.ui:ui:$version"
     val material = "androidx.compose.material:material:$version"
@@ -25,7 +25,7 @@ object SqlDelight {
 object AndroidX {
     val core = "androidx.core:core-ktx:1.3.2"
     val appCompat = "androidx.appcompat:appcompat:1.2.0"
-    val navigationCompose = "androidx.navigation:navigation-compose:1.0.0-alpha10"
+    val navigationCompose = "androidx.navigation:navigation-compose:2.4.0-alpha01"
     val startup = "androidx.startup:startup-runtime:1.0.0"
 
     object Test {

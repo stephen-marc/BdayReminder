@@ -3,8 +3,9 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { setUrl("https://jitpack.io") }
         maven("https://www.jetbrains.com/intellij-repository/releases")
-        maven("https://jetbrains.bintray.com/intellij-third-party-dependencies" )
+        maven("https://dl.bintray.com/arrow-kt/arrow-kt/")
     }
     dependencies {
         classpath("com.android.tools.build:gradle:7.0.0-alpha15")
