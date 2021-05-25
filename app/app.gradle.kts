@@ -3,6 +3,7 @@ plugins {
     id("kotlin-android")
     id("com.squareup.sqldelight")
     id("kotlin-kapt")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -53,6 +54,7 @@ dependencies {
     implementation(AndroidX.appCompat)
     implementation(AndroidX.core)
     implementation(AndroidX.navigationCompose)
+    implementation(AndroidX.lifecycleCompose)
     implementation(AndroidX.startup)
     implementation(Libs.material)
     implementation(Libs.timber)
@@ -65,9 +67,12 @@ dependencies {
     implementation(Coil.core)
     implementation(SqlDelight.coroutineExt)
     implementation(SqlDelight.androidDriver)
-    implementation(Koin.androidExt)
-    implementation(Koin.coreAndroid)
-    implementation(Koin.compose)
+    implementation("com.google.dagger:hilt-android:2.35")
+    kapt("com.google.dagger:hilt-android-compiler:2.35")
+
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0-alpha02")
+    kapt("androidx.hilt:hilt-compiler:1.0.0")
+
     implementation("io.github.vanpra.compose-material-dialogs:datetime:0.4.1")
     implementation("io.arrow-kt:arrow-optics:0.13.2")
     kapt("io.arrow-kt:arrow-meta:0.13.2")

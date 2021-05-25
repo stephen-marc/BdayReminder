@@ -7,14 +7,16 @@ import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import dagger.hilt.android.AndroidEntryPoint
 import dev.prochnow.bdayreminder.navigation.Actions
 import dev.prochnow.bdayreminder.navigation.Screen
 import dev.prochnow.bdayreminder.ui.theme.BdayTheme
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         setContent {
             BdayTheme() {
                 val navController = rememberNavController()

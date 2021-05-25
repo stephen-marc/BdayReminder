@@ -2,6 +2,7 @@ package dev.prochnow.bdayreminder
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -14,31 +15,30 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.SavedStateHandle
+import androidx.hilt.navigation.compose.hiltViewModel
 import dev.prochnow.bdayreminder.ui.components.AddBirthdayComponent
-import dev.prochnow.bdayreminder.ui.theme.BdayTheme
 import dev.prochnow.bdayreminder.ui.theme.CategoryTheme
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.getStateViewModel
+import java.time.LocalDate
 import java.time.Month
 import java.time.format.TextStyle
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class)
 @Composable
-fun BirthdayListScreen(addBirthdayViewModel: AddBirthDayViewModel = getStateViewModel()) {
+fun BirthdayListScreen(addBirthdayViewModel: AddBirthDayViewModel = hiltViewModel()) {
     val state by addBirthdayViewModel.viewState.collectAsState()
-    val bottomSheetScaffoldState = rememberModalBottomSheetState(
+    val sheetState = rememberModalBottomSheetState(
         ModalBottomSheetValue.Hidden
     )
     val coroutineScope = rememberCoroutineScope()
     val bottomSheetToggle: () -> Unit = {
         coroutineScope.launch {
-            if (bottomSheetScaffoldState.isVisible) {
-                bottomSheetScaffoldState.hide()
+            addBirthdayViewModel.resetEntry()
+            if (sheetState.isVisible) {
+                sheetState.hide()
             } else {
-                bottomSheetScaffoldState.show()
+                sheetState.show()
             }
         }
     }
@@ -49,29 +49,61 @@ fun BirthdayListScreen(addBirthdayViewModel: AddBirthDayViewModel = getStateView
 
     ModalBottomSheetLayout(
         sheetContent = {
-            CategoryTheme(state.category.selectedColorCategory.categoryModel) {
-                TopAppBar(
-                    title = { Text(stringResource(id = R.string.add_birthday_screen_title)) },
-                    elevation = 0.dp, actions = {
-                        AppBarActionIcon(onCreateEntryClicked)
-                    }
-                )
-                AddBirthdayComponent(addBirthdayViewModel)
-            }
+            AddBirthdaySheetComponent(
+                onCreateEntryClicked = onCreateEntryClicked,
+                onNameChange = addBirthdayViewModel::updateName,
+                nameModel = state.name,
+                timeModel = state.time,
+                categorySelectionModel = state.category,
+                onDateChange = addBirthdayViewModel::updateDate,
+                onCategoryChange = addBirthdayViewModel::updateCategory
+            )
         },
-        sheetState = bottomSheetScaffoldState
+        sheetShape = MaterialTheme.shapes.large.copy(
+            bottomEnd = CornerSize(0.dp),
+            bottomStart = CornerSize(0.dp)
+        ),
+        sheetState = sheetState
     ) {
         Scaffold(
             topBar = { AddBirthdayTopBar() },
             floatingActionButton = {
                 AddFloatingActionButton(
                     onClick = bottomSheetToggle,
-                    yOffsetFraction = 1 - bottomSheetScaffoldState.progress.fraction
+                    yOffsetFraction = 1 - sheetState.progress.fraction
                 )
             },
         ) {
 
         }
+    }
+}
+
+@Composable
+private fun AddBirthdaySheetComponent(
+    nameModel: AddBirthDayViewModel.NameModel,
+    timeModel: AddBirthDayViewModel.TimeModel,
+    categorySelectionModel: AddBirthDayViewModel.CategorySelectionModel,
+    onCreateEntryClicked: () -> Unit,
+    onNameChange: (String) -> Unit,
+    onDateChange: (LocalDate) -> Unit,
+    onCategoryChange: (ColorCategoryModel) -> Unit
+) {
+    CategoryTheme(categorySelectionModel.selectedColorCategory.categoryModel) {
+        TopAppBar(
+            title = { Text(stringResource(id = R.string.add_birthday_screen_title)) },
+            elevation = 0.dp, actions = {
+                AppBarActionIcon(onCreateEntryClicked)
+            }
+        )
+        AddBirthdayComponent(
+            nameModel = nameModel,
+            timeModel = timeModel,
+            categorySelectionModel = categorySelectionModel,
+            onNameChange = onNameChange,
+            onDateChange = onDateChange,
+            onCategoryChange = onCategoryChange
+        )
     }
 }
 
@@ -120,15 +152,6 @@ fun AddBirthdayTopBar(onNavigateBackClicked: () -> Unit = { /*TODO*/ }) {
             }
         },
     )
-}
-
-
-@Preview
-@Composable
-fun PreviewAddBirthdayScreen() {
-    BdayTheme() {
-        BirthdayListScreen(AddBirthDayViewModel(SavedStateHandle()))
-    }
 }
 
 fun Locale.toJavaLocale(): java.util.Locale = java.util.Locale.forLanguageTag(this.toLanguageTag())

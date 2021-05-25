@@ -27,6 +27,7 @@ object AndroidX {
     val appCompat = "androidx.appcompat:appcompat:1.2.0"
     val navigationCompose = "androidx.navigation:navigation-compose:2.4.0-alpha01"
     val startup = "androidx.startup:startup-runtime:1.0.0"
+    val lifecycleCompose = "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha05"
 
     object Test {
         val junit = "androidx.test.ext:junit:1.1.2"

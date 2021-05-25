@@ -4,12 +4,13 @@
     package="dev.prochnow.bdayreminder">
 
     <application
-    android:allowBackup="true"
-    android:label="@string/app_name"
-    android:icon="@mipmap/ic_launcher"
-    android:roundIcon="@mipmap/ic_launcher_round"
-    android:supportsRtl="true"
-    android:theme="@style/Theme.BdayReminder">
+        android:name=".BdayReminderApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.BdayReminder">
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -33,4 +34,4 @@
         </provider>
     </application>
 
-    </manifest>
+</manifest>

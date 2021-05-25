@@ -11,6 +11,7 @@ buildscript {
         classpath("com.android.tools.build:gradle:7.0.0-alpha15")
         classpath(Kotlin.gradlePlugin)
         classpath(SqlDelight.gradlePlugin)
+        classpath("com.google.dagger:hilt-android-gradle-plugin:2.35")
     }
 }
 

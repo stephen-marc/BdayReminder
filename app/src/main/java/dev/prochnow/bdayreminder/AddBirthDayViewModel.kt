@@ -1,9 +1,10 @@
 package dev.prochnow.bdayreminder
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.optics.optics
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.prochnow.bdayreminder.interactor.BirthdateInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import javax.inject.Inject
 
 val CATEGORIES = listOf(
     ColorCategoryModel(LocalizedString.RawString("None"), CategoryModel.NONE),
@@ -20,8 +22,9 @@ val CATEGORIES = listOf(
     ColorCategoryModel(LocalizedString.RawString("Work"), CategoryModel.WORK),
 )
 
-class AddBirthDayViewModel(
-    private val state: SavedStateHandle
+@HiltViewModel
+class AddBirthDayViewModel @Inject constructor(
+    private val birthdateInteractor: BirthdateInteractor,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddBirthdayModel())
@@ -118,13 +121,26 @@ class AddBirthDayViewModel(
         _timeModel.update {
             TimeModel.validate.set(this, true)
         }
-//        _timeModel.update {
-////            TimeModel.day.validate.set(
-////                this, true
-////            ).run {
-////                TimeModel.month.validate.set(this, true)
-////            }
-//        }
+        if (entryIsValid()) {
+            viewModelScope.launch {
+                val date = requireNotNull(_timeModel.value.date)
+                birthdateInteractor.saveEntry(
+                    name = _nameModel.value.value.stringValue,
+                    date = date,
+                    category = _categoryModel.value.selectedColorCategory.name.toString()
+                )
+            }
+        }
+    }
+
+    private fun entryIsValid(): Boolean {
+        return _nameModel.value.isValid && _timeModel.value.isValid
+    }
+
+    fun resetEntry() {
+        _timeModel.value = TimeModel()
+        _nameModel.value = NameModel()
+        _categoryModel.value = CategorySelectionModel()
     }
 }
 
