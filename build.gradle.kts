@@ -8,10 +8,10 @@ buildscript {
         maven("https://dl.bintray.com/arrow-kt/arrow-kt/")
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:7.0.0-alpha15")
+        classpath("com.android.tools.build:gradle:7.0.0-beta03")
         classpath(Kotlin.gradlePlugin)
         classpath(SqlDelight.gradlePlugin)
-        classpath("com.google.dagger:hilt-android-gradle-plugin:2.35")
+        classpath("com.google.dagger:hilt-android-gradle-plugin:2.36")
     }
 }
 

@@ -70,8 +70,8 @@ dependencies {
 
     implementation("com.facebook.stetho:stetho:1.5.1")
 
-    implementation("com.google.dagger:hilt-android:2.35")
-    kapt("com.google.dagger:hilt-android-compiler:2.35")
+    implementation("com.google.dagger:hilt-android:2.36")
+    kapt("com.google.dagger:hilt-android-compiler:2.36")
 
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0-alpha02")
     kapt("androidx.hilt:hilt-compiler:1.0.0")
