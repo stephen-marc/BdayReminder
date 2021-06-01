@@ -15,4 +15,5 @@
     <string name="date_label">Birthdate</string>
     <string name="error_future_birthdate">Date can not be in the future</string>
     <string name="entry_created">Birthday saved!</string>
+    <string name="birthdate_title">%s\'s %dth birthday</string>
 </resources>

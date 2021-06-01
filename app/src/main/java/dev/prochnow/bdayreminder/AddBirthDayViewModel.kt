@@ -14,12 +14,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import javax.inject.Inject
 
-val CATEGORIES = listOf(
-    ColorCategoryModel(LocalizedString.RawString("None"), CategoryModel.NONE),
-    ColorCategoryModel(LocalizedString.RawString("Family"), CategoryModel.FAMILY),
-    ColorCategoryModel(LocalizedString.RawString("Friends"), CategoryModel.FRIENDS),
-    ColorCategoryModel(LocalizedString.RawString("Work"), CategoryModel.WORK),
-)
 
 @HiltViewModel
 class AddBirthDayViewModel @Inject constructor(
@@ -46,6 +40,57 @@ class AddBirthDayViewModel @Inject constructor(
         }
     }
 
+
+    fun updateName(newValue: String) {
+        _nameModel.value =
+            NameModel.value.set(_nameModel.value, LocalizedString.RawString(newValue))
+    }
+
+    fun updateDate(newValue: LocalDate) {
+        _timeModel.update { TimeModel.date.set(this, newValue) }
+    }
+
+    fun updateCategory(newValue: CategoryModel) {
+        _categoryModel.update { CategorySelectionModel.selectedColorCategory.set(this, newValue) }
+    }
+
+    fun saveEntry() {
+        _nameModel.update {
+            NameModel.validate.set(this, true)
+        }
+        _timeModel.update {
+            TimeModel.validate.set(this, true)
+        }
+        if (entryIsValid()) {
+            viewModelScope.launch {
+                val date = requireNotNull(_timeModel.value.date)
+                birthdateInteractor.saveEntry(
+                    name = _nameModel.value.value.stringValue,
+                    date = date,
+                    category = _categoryModel.value.selectedColorCategory.name
+                )
+                _eventChannel.send(Event.EntryCreated)
+                _eventChannel.send(Event.ShowSnackBar(LocalizedString.ResourceString(R.string.entry_created)))
+            }
+        }
+    }
+
+    private fun entryIsValid(): Boolean {
+        return _nameModel.value.isValid && _timeModel.value.isValid
+    }
+
+    fun resetEntry() {
+        _timeModel.value = TimeModel()
+        _nameModel.value = NameModel()
+        _categoryModel.value = CategorySelectionModel()
+    }
+
+    data class AddBirthdayModel(
+        val name: NameModel = NameModel(),
+        val time: TimeModel = TimeModel(),
+        val category: CategorySelectionModel = CategorySelectionModel()
+    )
+
     @optics
     data class NameModel(
         override val value: LocalizedString.RawString = LocalizedString.RawString(""),
@@ -63,17 +108,10 @@ class AddBirthDayViewModel @Inject constructor(
         companion object
     }
 
-
-    data class AddBirthdayModel(
-        val name: NameModel = NameModel(),
-        val time: TimeModel = TimeModel(),
-        val category: CategorySelectionModel = CategorySelectionModel()
-    )
-
     @optics
     data class CategorySelectionModel(
-        val availableCategories: List<ColorCategoryModel> = CATEGORIES,
-        val selectedColorCategory: ColorCategoryModel = CATEGORIES.first(),
+        val availableCategories: List<CategoryModel> = CategoryModel.all(),
+        val selectedColorCategory: CategoryModel = CategoryModel.all().first(),
     ) {
         companion object
     }
@@ -103,49 +141,6 @@ class AddBirthDayViewModel @Inject constructor(
         companion object
     }
 
-    fun updateName(newValue: String) {
-        _nameModel.value =
-            NameModel.value.set(_nameModel.value, LocalizedString.RawString(newValue))
-    }
-
-    fun updateDate(newValue: LocalDate) {
-        _timeModel.update { TimeModel.date.set(this, newValue) }
-    }
-
-    fun updateCategory(newValue: ColorCategoryModel) {
-        _categoryModel.update { CategorySelectionModel.selectedColorCategory.set(this, newValue) }
-    }
-
-    fun saveEntry() {
-        _nameModel.update {
-            NameModel.validate.set(this, true)
-        }
-        _timeModel.update {
-            TimeModel.validate.set(this, true)
-        }
-        if (entryIsValid()) {
-            viewModelScope.launch {
-                val date = requireNotNull(_timeModel.value.date)
-                birthdateInteractor.saveEntry(
-                    name = _nameModel.value.value.stringValue,
-                    date = date,
-                    category = _categoryModel.value.selectedColorCategory.categoryModel.name
-                )
-                _eventChannel.send(Event.EntryCreated)
-                _eventChannel.send(Event.ShowSnackBar(LocalizedString.ResourceString(R.string.entry_created)))
-            }
-        }
-    }
-
-    private fun entryIsValid(): Boolean {
-        return _nameModel.value.isValid && _timeModel.value.isValid
-    }
-
-    fun resetEntry() {
-        _timeModel.value = TimeModel()
-        _nameModel.value = NameModel()
-        _categoryModel.value = CategorySelectionModel()
-    }
 
     sealed class Event {
         object EntryCreated : Event()
@@ -153,16 +148,24 @@ class AddBirthDayViewModel @Inject constructor(
     }
 }
 
+enum class CategoryModel(val localizedName: LocalizedString) {
+    NONE(
+        LocalizedString.RawString("None")
+    ),
+    FAMILY(
+        LocalizedString.RawString("None")
+    ),
+    FRIENDS(
+        LocalizedString.RawString("None")
+    ),
+    WORK(LocalizedString.RawString("None"));
 
-enum class CategoryModel {
-    NONE, FAMILY, FRIENDS, WORK
+    companion object {
+        fun all(): List<CategoryModel> {
+            return values().asList()
+        }
+    }
 }
-
-
-data class ColorCategoryModel(
-    val name: LocalizedString,
-    val categoryModel: CategoryModel
-)
 
 interface Validatable<T> {
     val value: T

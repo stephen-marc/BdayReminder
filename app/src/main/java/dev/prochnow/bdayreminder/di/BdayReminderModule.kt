@@ -14,21 +14,25 @@ import dev.prochnow.bdayreminder.Database
 import dev.prochnow.bdayreminder.domain.store.BirthdayDataStore
 import dev.prochnow.bdayreminder.storage.LocalDateColumnAdapter
 import dev.prochnow.bdayreminder.storage.SqlBirthdateDataStore
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class BdayReminderModule {
 
     @Binds
+    @Singleton
     abstract fun bindBirthdayDataStore(dataStore: SqlBirthdateDataStore): BirthdayDataStore
 
     companion object {
         @Provides
+        @Singleton
         fun provideBirthdaysQueries(database: Database): BirthdaysQueries {
             return database.birthdaysQueries
         }
 
         @Provides
+        @Singleton
         fun provideDatabase(@ApplicationContext appContext: Context): Database {
             return Database(
                 AndroidSqliteDriver(Database.Schema, appContext, "storage.db"),

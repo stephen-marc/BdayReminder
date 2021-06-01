@@ -28,7 +28,8 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     composable(Screen.MainScreen.route()) {
                         val addBirthDayViewModel: AddBirthDayViewModel = hiltViewModel(it)
-                        BirthdayListScreen(addBirthDayViewModel)
+                        val birthdateListViewModel: BirthdayListViewModel = hiltViewModel(it)
+                        BirthdayListScreen(addBirthDayViewModel, birthdateListViewModel)
                     }
                 }
             }

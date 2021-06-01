@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.prochnow.bdayreminder.AddBirthDayViewModel
-import dev.prochnow.bdayreminder.ColorCategoryModel
+import dev.prochnow.bdayreminder.CategoryModel
 import dev.prochnow.bdayreminder.R
 import dev.prochnow.bdayreminder.ui.get
 import dev.prochnow.bdayreminder.ui.theme.CategoryTheme
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.collect
 fun CategorySelectionDropDown(
     modifier: Modifier = Modifier,
     categoryModel: AddBirthDayViewModel.CategorySelectionModel,
-    onCategoryClick: (ColorCategoryModel) -> Unit,
+    onCategoryClick: (CategoryModel) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -46,12 +46,12 @@ fun CategorySelectionDropDown(
     Column(modifier = modifier) {
         OutlinedTextField(
             modifier = Modifier,
-            value = categoryModel.selectedColorCategory.name.get(LocalContext.current),
+            value = categoryModel.selectedColorCategory.localizedName.get(LocalContext.current),
             leadingIcon = {
                 Canvas(modifier = Modifier
                     .size(16.dp), onDraw = {
                     drawCircle(
-                        color = palette[categoryModel.selectedColorCategory.categoryModel]
+                        color = palette[categoryModel.selectedColorCategory]
                             ?: fallbackColor
                     )
                 })
@@ -77,9 +77,9 @@ fun CategorySelectionDropDown(
                     Canvas(modifier = Modifier
                         .padding(end = 8.dp)
                         .size(16.dp), onDraw = {
-                        drawCircle(color = palette[it.categoryModel] ?: fallbackColor)
+                        drawCircle(color = palette[it] ?: fallbackColor)
                     })
-                    Text(text = it.name.get(LocalContext.current))
+                    Text(text = it.localizedName.get(LocalContext.current))
                 }
             }
         }

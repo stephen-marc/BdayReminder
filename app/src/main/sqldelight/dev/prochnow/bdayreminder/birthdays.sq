@@ -3,21 +3,15 @@ import java.time.LocalDate;
 
 
 selectAll:
-SELECT *
-FROM birthday JOIN category USING(category);
+SELECT * FROM birthday;
 
 insertFullBirthdateObject:
 INSERT INTO birthday(uuid, personName, date, category)
 VALUES ?;
 
-CREATE TABLE category(
-    category TEXT PRIMARY KEY NOT NULL
-);
-
 CREATE TABLE birthday(
     uuid TEXT PRIMARY KEY,
     personName Text NOT NULL,
     date TEXT AS LocalDate NOT NULL,
-    category TEXT NOT NULL,
-    FOREIGN KEY(category) REFERENCES category(category)
+    category TEXT NOT NULL
  );

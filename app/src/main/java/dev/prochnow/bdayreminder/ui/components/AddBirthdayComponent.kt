@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.prochnow.bdayreminder.AddBirthDayViewModel
-import dev.prochnow.bdayreminder.ColorCategoryModel
+import dev.prochnow.bdayreminder.CategoryModel
 import dev.prochnow.bdayreminder.R
 import dev.prochnow.bdayreminder.ui.get
 import java.time.LocalDate
@@ -25,7 +25,7 @@ fun AddBirthdayComponent(
     categorySelectionModel: AddBirthDayViewModel.CategorySelectionModel,
     onNameChange: (String) -> Unit,
     onDateChange: (LocalDate) -> Unit,
-    onCategoryChange: (ColorCategoryModel) -> Unit
+    onCategoryChange: (CategoryModel) -> Unit
 ) {
     Column(
         modifier = Modifier

@@ -11,12 +11,5 @@ interface EntityAdapter<EntityType : Any, DataType> {
      */
     fun encode(entity: EntityType): DataType
 
-    fun EntityType.encodetoData(): DataType {
-        return encode(this)
-    }
-
-    fun DataType.decodeToEntity(): EntityType {
-        return decode(this)
-    }
 }
 

@@ -14,6 +14,8 @@ class BirthdateInteractor @Inject constructor(
     private val birthdayDataStore: BirthdayDataStore,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
+    val birthdays = birthdayDataStore.birthdays
+
     suspend fun saveEntry(name: String, date: LocalDate, category: String) {
         withContext(ioDispatcher) {
             birthdayDataStore.upsertBirthday(
