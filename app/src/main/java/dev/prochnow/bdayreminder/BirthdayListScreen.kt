@@ -1,11 +1,10 @@
 package dev.prochnow.bdayreminder
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -16,15 +15,15 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.prochnow.bdayreminder.ui.components.AddBirthdayComponent
+import dev.prochnow.bdayreminder.ui.components.ActionDrawer
+import dev.prochnow.bdayreminder.ui.components.BirthdateCard
+import dev.prochnow.bdayreminder.ui.components.BirthdayInputComponent
 import dev.prochnow.bdayreminder.ui.get
 import dev.prochnow.bdayreminder.ui.theme.CategoryTheme
 import kotlinx.coroutines.flow.launchIn
@@ -33,6 +32,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Month
 import java.time.format.TextStyle
+import java.util.*
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -101,14 +101,17 @@ fun BirthdayListScreen(
                 )
             },
         ) {
-
-            when (val state = listState) {
-                is BirthdayListViewModel.BirthdateListViewState.ContentState -> BirthdateList(
-                    birthdates = state.list
-                )
-                BirthdayListViewModel.BirthdateListViewState.EmptyState -> {
-                }
-                BirthdayListViewModel.BirthdateListViewState.InitialState -> {
+            Surface(color = MaterialTheme.colors.background) {
+                when (val state = listState) {
+                    is BirthdayListViewModel.BirthdateListViewState.ContentState -> BirthdateList(
+                        birthdates = state.list,
+                        updateBirthdate = birthdayListViewModel::updateBirthdate,
+                        deleteBirthdate = birthdayListViewModel::deleteBirthdate
+                    )
+                    BirthdayListViewModel.BirthdateListViewState.EmptyState -> {
+                    }
+                    BirthdayListViewModel.BirthdateListViewState.InitialState -> {
+                    }
                 }
             }
 
@@ -117,19 +120,56 @@ fun BirthdayListScreen(
 }
 
 @Composable
-fun BirthdateList(birthdates: List<BirthdayListViewModel.BirthdateModel>) {
+fun BirthdateList(
+    birthdates: List<BirthdayListViewModel.BirthdateModel>,
+    updateBirthdate: (BirthdayListViewModel.BirthdateModel) -> Unit,
+    deleteBirthdate: (UUID) -> Unit,
+) {
+    var selectedDrawer by remember { mutableStateOf<UUID?>(null) }
+
     LazyColumn(
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(birthdates) { item ->
-            BirthdateCard(
-                title = item.title.get(LocalContext.current),
-                date = item.date.get(
-                    LocalContext.current
-                ), category = item.category
-            )
+        itemsIndexed(birthdates) { index, item ->
+            CategoryTheme(colorPalette = item.categoryModel.selectedColorCategory) {
+                BirthdateCard(
+                    backContent = {
+                        ActionDrawer(item, updateBirthdate, {
+                            deleteBirthdate(it)
+                            selectedDrawer = null
+                        })
+                    },
+                    topContent = {
+                        BirthdateInfo(item = item) {
+                            selectedDrawer = if (selectedDrawer != item.uuid) item.uuid else null
+                        }
+                    },
+                    expanded = item.uuid == selectedDrawer,
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun BirthdateInfo(item: BirthdayListViewModel.BirthdateModel, onClick: () -> Unit) {
+    Column(
+        Modifier
+            .clickable { onClick() }
+            .padding(16.dp)) {
+        Text(
+            modifier = Modifier.paddingFromBaseline(top = 8.dp),
+            text = item.dateModel.date.toString(),
+            style = MaterialTheme.typography.overline,
+            color = LocalContentColor.current.copy(
+                ContentAlpha.medium
+            )
+        )
+        Text(
+            item.nameModel.value.get(LocalContext.current),
+            style = MaterialTheme.typography.h6
+        )
     }
 }
 
@@ -137,116 +177,71 @@ fun BirthdateList(birthdates: List<BirthdayListViewModel.BirthdateModel>) {
 @Composable
 fun PreviewBirthdateCard() {
     CategoryTheme {
-        BirthdateCard("Stephens 34th birthday", "Monday, 23.06.1987", CategoryModel.FRIENDS)
-    }
-}
-
-@Composable
-fun BirthdateCard(
-    title: String,
-    date: String,
-    category: CategoryModel
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    val offset by animateIntAsState(
-        targetValue = if (expanded) {
-            48
-        } else {
-            0
-        }
-    )
-
-    CategoryTheme(colorPalette = category) {
-        Box(modifier = Modifier) {
-            Card(
-                modifier = Modifier
-                    .padding(top = offset.dp)
-                    .height(64.dp)
-                    .fillMaxWidth(),
-                backgroundColor = android.graphics.Color.HSVToColor(FloatArray(3).apply {
-                    android.graphics.Color.colorToHSV(MaterialTheme.colors.primary.toArgb(), this)
-                    this[2] *= 0.7f
-                }).let {
-                    Color(it)
-                },
-                elevation = 0.dp
+        BirthdateCard(backContent = {
+            Row(
+                Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.End
             ) {
-                CompositionLocalProvider(LocalContentColor provides (MaterialTheme.colors.onPrimary)) {
-                    Row(
-                        Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        IconButton(onClick = { /*TODO*/ }) {
-                            Icon(
-                                imageVector = Icons.Filled.Edit,
-                                contentDescription = stringResource(id = R.string.cd_add_new_birthday)
-                            )
-                        }
-                        IconButton(onClick = { /*TODO*/ }) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = stringResource(id = R.string.cd_add_new_birthday)
-                            )
-                        }
-                    }
-                }
-            }
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        expanded = !expanded
-                    },
-                backgroundColor = MaterialTheme.colors.primary,
-                elevation = if (expanded) 16.dp else 0.dp
-
-            ) {
-                Column(Modifier.padding(16.dp)) {
-                    Text(
-                        modifier = Modifier.paddingFromBaseline(top = 8.dp),
-                        text = date,
-                        style = MaterialTheme.typography.overline,
-                        color = LocalContentColor.current.copy(
-                            ContentAlpha.medium
-                        )
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = stringResource(id = R.string.cd_add_new_birthday)
                     )
-                    Text(title, style = MaterialTheme.typography.h6)
+                }
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = stringResource(id = R.string.cd_add_new_birthday)
+                    )
                 }
             }
-
+        }) {
+            Column(Modifier.padding(16.dp)) {
+                Text(
+                    modifier = Modifier.paddingFromBaseline(top = 8.dp),
+                    text = "Lorem",
+                    style = MaterialTheme.typography.overline,
+                    color = LocalContentColor.current.copy(
+                        ContentAlpha.medium
+                    )
+                )
+                Text("Lorem", style = MaterialTheme.typography.h6)
+            }
         }
-
     }
-
 }
+
 
 @Composable
 private fun AddBirthdaySheetComponent(
-    nameModel: AddBirthDayViewModel.NameModel,
-    timeModel: AddBirthDayViewModel.TimeModel,
-    categorySelectionModel: AddBirthDayViewModel.CategorySelectionModel,
+    nameModel: NameModel,
+    timeModel: TimeModel,
+    categorySelectionModel: CategorySelectionModel,
     onCreateEntryClicked: () -> Unit,
     onNameChange: (String) -> Unit,
     onDateChange: (LocalDate) -> Unit,
     onCategoryChange: (CategoryModel) -> Unit
 ) {
     CategoryTheme(categorySelectionModel.selectedColorCategory) {
-        TopAppBar(
-            title = { Text(stringResource(id = R.string.add_birthday_screen_title)) },
-            elevation = 0.dp, actions = {
-                AppBarActionIcon(onCreateEntryClicked)
-            }
-        )
-        AddBirthdayComponent(
-            nameModel = nameModel,
-            timeModel = timeModel,
-            categorySelectionModel = categorySelectionModel,
-            onNameChange = onNameChange,
-            onDateChange = onDateChange,
-            onCategoryChange = onCategoryChange
-        )
+        Column {
+            TopAppBar(
+                title = { Text(stringResource(id = R.string.add_birthday_screen_title)) },
+                elevation = 0.dp, actions = {
+                    AppBarActionIcon(onCreateEntryClicked)
+                }
+            )
+            BirthdayInputComponent(
+                modifier = Modifier
+                    .padding(top = 16.dp, bottom = 40.dp, start = 16.dp, end = 16.dp),
+                nameModel = nameModel,
+                timeModel = timeModel,
+                categorySelectionModel = categorySelectionModel,
+                onNameChange = onNameChange,
+                onDateChange = onDateChange,
+                onCategoryChange = onCategoryChange
+            )
+        }
+
     }
 }
 
@@ -289,6 +284,8 @@ fun AddBirthdayTopBar() {
     )
 }
 
-fun Locale.toJavaLocale(): java.util.Locale = java.util.Locale.forLanguageTag(this.toLanguageTag())
+fun Locale.toJavaLocale(): java.util.Locale =
+    java.util.Locale.forLanguageTag(this.toLanguageTag())
+
 fun Month.localizedName(locale: Locale): String =
     this.getDisplayName(TextStyle.FULL, locale.toJavaLocale())

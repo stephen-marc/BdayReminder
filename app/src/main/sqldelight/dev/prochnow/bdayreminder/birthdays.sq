@@ -3,11 +3,16 @@ import java.time.LocalDate;
 
 
 selectAll:
-SELECT * FROM birthday;
+SELECT * FROM birthday ORDER BY birthday.date;
 
 insertFullBirthdateObject:
-INSERT INTO birthday(uuid, personName, date, category)
+INSERT OR REPLACE INTO birthday(uuid, personName, date, category)
 VALUES ?;
+
+deleteBirthdate:
+DELETE
+FROM birthday
+WHERE uuid = ?;
 
 CREATE TABLE birthday(
     uuid TEXT PRIMARY KEY,

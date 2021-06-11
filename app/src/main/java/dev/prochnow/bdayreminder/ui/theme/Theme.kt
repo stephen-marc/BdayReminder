@@ -4,7 +4,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.*
@@ -54,14 +53,10 @@ fun BdayTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable()
 
 @Stable
 data class AppColors(
-    val selectedCategoryColor: Color,
-    val materialColors: Colors,
     val categoryPalette: Map<CategoryModel, Color>
 )
 
 private val catergoryLightColors = AppColors(
-    LightColorPalette.secondary,
-    LightColorPalette,
     mapOf(
         CategoryModel.NONE to CategoryLightColors.none,
         CategoryModel.WORK to CategoryLightColors.work,
@@ -71,8 +66,6 @@ private val catergoryLightColors = AppColors(
 )
 
 private val catergoryDarkColors = AppColors(
-    DarkColorPalette.secondary,
-    DarkColorPalette,
     mapOf(
         CategoryModel.NONE to CategoryDarkColors.none,
         CategoryModel.WORK to CategoryDarkColors.work,
@@ -115,10 +108,10 @@ fun CategoryTheme(
         LocalAppColors provides colors,
     ) {
         MaterialTheme(
-            colors = colors.materialColors.copy(
+            colors = MaterialTheme.colors.copy(
                 primary = animateColorAsState(
                     targetValue = colors.categoryPalette[colorPalette]
-                        ?: colors.materialColors.primary,
+                        ?: MaterialTheme.colors.primary,
                     animationSpec = spring(
                         stiffness = Spring.StiffnessMedium
                     )

@@ -14,8 +14,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import dev.prochnow.bdayreminder.AddBirthDayViewModel
 import dev.prochnow.bdayreminder.CategoryModel
+import dev.prochnow.bdayreminder.CategorySelectionModel
 import dev.prochnow.bdayreminder.R
 import dev.prochnow.bdayreminder.ui.get
 import dev.prochnow.bdayreminder.ui.theme.CategoryTheme
@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.collect
 @Composable
 fun CategorySelectionDropDown(
     modifier: Modifier = Modifier,
-    categoryModel: AddBirthDayViewModel.CategorySelectionModel,
+    categoryModel: CategorySelectionModel,
     onCategoryClick: (CategoryModel) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }

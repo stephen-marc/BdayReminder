@@ -16,17 +16,29 @@ class BirthdateInteractor @Inject constructor(
 ) {
     val birthdays = birthdayDataStore.birthdays
 
-    suspend fun saveEntry(name: String, date: LocalDate, category: String) {
+    suspend fun saveEntry(
+        uuid: UUID = UUID.randomUUID(),
+        name: String,
+        date: LocalDate,
+        category: String
+    ) {
         withContext(ioDispatcher) {
             birthdayDataStore.upsertBirthday(
                 BirthdayEntity(
-                    UUID.randomUUID(),
+                    uuid,
                     name,
                     date,
                     CategoryEntity.valueOf(category)
                 )
             )
         }
+    }
 
+    suspend fun deleteEntry(
+        uuid: UUID
+    ) {
+        withContext(ioDispatcher) {
+            birthdayDataStore.deleteBirthday(uuid)
+        }
     }
 }

@@ -91,56 +91,6 @@ class AddBirthDayViewModel @Inject constructor(
         val category: CategorySelectionModel = CategorySelectionModel()
     )
 
-    @optics
-    data class NameModel(
-        override val value: LocalizedString.RawString = LocalizedString.RawString(""),
-        override val validate: Boolean = false
-    ) : Validatable<LocalizedString> {
-        override val isValid: Boolean
-            get() = value.stringValue.isNotEmpty()
-
-        override val errors: LocalizedString
-            get() = when {
-                value.stringValue.isEmpty() -> LocalizedString.resource(R.string.error_required)
-                else -> LocalizedString.empty()
-            }
-
-        companion object
-    }
-
-    @optics
-    data class CategorySelectionModel(
-        val availableCategories: List<CategoryModel> = CategoryModel.all(),
-        val selectedColorCategory: CategoryModel = CategoryModel.all().first(),
-    ) {
-        companion object
-    }
-
-    @optics
-    data class TimeModel(
-        val date: LocalDate? = null,
-        override val validate: Boolean = false
-    ) : Validatable<LocalizedString> {
-        override val isValid: Boolean
-            get() = date?.isAfter(LocalDate.now())?.not() ?: false
-        override val errors: LocalizedString
-            get() = when {
-                date == null -> LocalizedString.resource(R.string.error_required)
-                date.isAfter(LocalDate.now()) -> LocalizedString.resource(R.string.error_future_birthdate)
-                else -> LocalizedString.empty()
-            }
-        override val value: LocalizedString
-            get() = LocalizedString.RawString(
-                date?.format(
-                    DateTimeFormatter.ofLocalizedDate(
-                        FormatStyle.MEDIUM
-                    )
-                ) ?: ""
-            )
-
-        companion object
-    }
-
 
     sealed class Event {
         object EntryCreated : Event()
@@ -178,4 +128,54 @@ interface Validatable<T> {
 
 fun <T> MutableStateFlow<T>.update(update: T.() -> T) {
     this.value = this.value.update()
+}
+
+@optics
+data class NameModel(
+    override val value: LocalizedString.RawString = LocalizedString.RawString(""),
+    override val validate: Boolean = false
+) : Validatable<LocalizedString> {
+    override val isValid: Boolean
+        get() = value.stringValue.isNotEmpty()
+
+    override val errors: LocalizedString
+        get() = when {
+            value.stringValue.isEmpty() -> LocalizedString.resource(R.string.error_required)
+            else -> LocalizedString.empty()
+        }
+
+    companion object
+}
+
+@optics
+data class CategorySelectionModel(
+    val availableCategories: List<CategoryModel> = CategoryModel.all(),
+    val selectedColorCategory: CategoryModel = CategoryModel.all().first(),
+) {
+    companion object
+}
+
+@optics
+data class TimeModel(
+    val date: LocalDate? = null,
+    override val validate: Boolean = false
+) : Validatable<LocalizedString> {
+    override val isValid: Boolean
+        get() = date?.isAfter(LocalDate.now())?.not() ?: false
+    override val errors: LocalizedString
+        get() = when {
+            date == null -> LocalizedString.resource(R.string.error_required)
+            date.isAfter(LocalDate.now()) -> LocalizedString.resource(R.string.error_future_birthdate)
+            else -> LocalizedString.empty()
+        }
+    override val value: LocalizedString
+        get() = LocalizedString.RawString(
+            date?.format(
+                DateTimeFormatter.ofLocalizedDate(
+                    FormatStyle.MEDIUM
+                )
+            ) ?: ""
+        )
+
+    companion object
 }

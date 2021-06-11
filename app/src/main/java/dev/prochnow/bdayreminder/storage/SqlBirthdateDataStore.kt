@@ -26,6 +26,10 @@ class SqlBirthdateDataStore @Inject constructor(
     override suspend fun upsertBirthday(birthdayEntity: BirthdayEntity) {
         birthdaysQueries.insertFullBirthdateObject(birthdayMapper.encode(birthdayEntity))
     }
+
+    override suspend fun deleteBirthday(uuid: UUID) {
+        birthdaysQueries.deleteBirthdate(uuid.toString())
+    }
 }
 
 class BirthdayMapper @Inject constructor() : EntityAdapter<BirthdayEntity, Birthday> {

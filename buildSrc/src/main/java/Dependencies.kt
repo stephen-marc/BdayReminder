@@ -1,5 +1,5 @@
 object Compose {
-    val version = "1.0.0-beta07"
+    val version = "1.0.0-beta08"
 
     val ui = "androidx.compose.ui:ui:$version"
     val material = "androidx.compose.material:material:$version"
@@ -41,7 +41,7 @@ object Coil {
 }
 
 object Kotlin {
-    val version = "1.4.32"
+    val version = "1.5.10"
 
     val stdlib = "org.jetbrains.kotlin:kotlin-stdlib"
     val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3"

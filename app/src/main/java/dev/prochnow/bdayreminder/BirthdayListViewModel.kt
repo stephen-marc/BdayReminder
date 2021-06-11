@@ -2,8 +2,8 @@ package dev.prochnow.bdayreminder
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import arrow.optics.optics
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.prochnow.bdayreminder.domain.EntityAdapter
 import dev.prochnow.bdayreminder.domain.entity.BirthdayEntity
 import dev.prochnow.bdayreminder.interactor.BirthdateInteractor
 import dev.prochnow.bdayreminder.ui.LocalizedString
@@ -11,16 +11,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class BirthdayListViewModel @Inject constructor(
-    private val birthdateInteractor: BirthdateInteractor,
-    private val birthdateMapper: BirthdateMapper
+    private val birthdateInteractor: BirthdateInteractor
 ) : ViewModel() {
     private val _state =
         MutableStateFlow<BirthdateListViewState>(BirthdateListViewState.InitialState)
@@ -31,11 +27,28 @@ class BirthdayListViewModel @Inject constructor(
             birthdateInteractor.birthdays.collect { list ->
                 _state.value = when {
                     list.isNotEmpty() -> BirthdateListViewState.ContentState(
-                        list.map(birthdateMapper::encode)
+                        list.map(BirthdayEntity::toBirthdateModel)
                     )
                     else -> BirthdateListViewState.EmptyState
                 }
             }
+        }
+    }
+
+    fun updateBirthdate(model: BirthdateModel) {
+        viewModelScope.launch {
+            birthdateInteractor.saveEntry(
+                uuid = model.uuid,
+                name = model.nameModel.value.stringValue,
+                date = model.dateModel.date!!,
+                category = model.categoryModel.selectedColorCategory.name
+            )
+        }
+    }
+
+    fun deleteBirthdate(uuid: UUID) {
+        viewModelScope.launch {
+            birthdateInteractor.deleteEntry(uuid = uuid)
         }
     }
 
@@ -47,34 +60,31 @@ class BirthdayListViewModel @Inject constructor(
         ) : BirthdateListViewState()
     }
 
+    @optics
     data class BirthdateModel(
         val uuid: UUID,
-        val title: LocalizedString,
-        val date: LocalizedString,
-        val category: CategoryModel
+        val nameModel: NameModel,
+        val dateModel: TimeModel,
+        val categoryModel: CategorySelectionModel
+    ) {
+        companion object
+    }
+}
+
+fun BirthdayEntity.toBirthdateModel(): BirthdayListViewModel.BirthdateModel {
+    return BirthdayListViewModel.BirthdateModel(
+        uuid = uuid,
+        nameModel = NameModel(personName.asRawString(), validate = true),
+        dateModel = TimeModel(date, validate = true),
+        categoryModel = CategorySelectionModel(
+            selectedColorCategory = CategoryModel.valueOf(
+                category.name
+            )
+        )
     )
 }
 
-class BirthdateMapper @Inject constructor() :
-    EntityAdapter<BirthdayEntity, BirthdayListViewModel.BirthdateModel> {
 
-    override fun decode(data: BirthdayListViewModel.BirthdateModel): BirthdayEntity {
-        TODO()
-    }
+fun String.asRawString(): LocalizedString.RawString = LocalizedString.RawString(this)
 
-    override fun encode(entity: BirthdayEntity): BirthdayListViewModel.BirthdateModel {
-        return BirthdayListViewModel.BirthdateModel(
-            entity.uuid,
-            LocalizedString.resource(
-                R.string.birthdate_title, entity.personName, LocalDate.now().year - entity.date.year
-            ),
-            LocalizedString.raw(
-                entity.date.format(
-                    DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-                )
-            ),
-            CategoryModel.valueOf(entity.category.name)
-        )
-    }
 
-}
