@@ -4,34 +4,25 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.prochnow.bdayreminder.ui.components.ActionDrawer
-import dev.prochnow.bdayreminder.ui.components.BirthdateCard
-import dev.prochnow.bdayreminder.ui.components.BirthdayInputComponent
+import dev.prochnow.bdayreminder.ui.components.*
 import dev.prochnow.bdayreminder.ui.get
+import dev.prochnow.bdayreminder.ui.theme.BdayTheme
 import dev.prochnow.bdayreminder.ui.theme.CategoryTheme
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.Month
-import java.time.format.TextStyle
 import java.util.*
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class)
@@ -95,10 +86,15 @@ fun BirthdayListScreen(
             scaffoldState = scaffoldState,
             topBar = { AddBirthdayTopBar() },
             floatingActionButton = {
-                AddFloatingActionButton(
+                MovableFloatingActionButton(
                     onClick = bottomSheetToggle,
                     yOffsetFraction = 1 - sheetState.progress.fraction
-                )
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = stringResource(id = R.string.cd_add_new_birthday)
+                    )
+                }
             },
         ) {
             Surface(color = MaterialTheme.colors.background) {
@@ -119,6 +115,16 @@ fun BirthdayListScreen(
     }
 }
 
+
+@Composable
+fun AddBirthdayTopBar() {
+    val topBarBackground = MaterialTheme.colors.primary
+    TopAppBar(
+        title = { Text(text = stringResource(id = R.string.app_name)) },
+        backgroundColor = topBarBackground,
+    )
+}
+
 @Composable
 fun BirthdateList(
     birthdates: List<BirthdayListViewModel.BirthdateModel>,
@@ -131,7 +137,7 @@ fun BirthdateList(
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        itemsIndexed(birthdates) { index, item ->
+        items(birthdates) { item ->
             CategoryTheme(colorPalette = item.categoryModel.selectedColorCategory) {
                 BirthdateCard(
                     backContent = {
@@ -173,45 +179,6 @@ private fun BirthdateInfo(item: BirthdayListViewModel.BirthdateModel, onClick: (
     }
 }
 
-@Preview(device = Devices.PIXEL_4)
-@Composable
-fun PreviewBirthdateCard() {
-    CategoryTheme {
-        BirthdateCard(backContent = {
-            Row(
-                Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.End
-            ) {
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        imageVector = Icons.Filled.Edit,
-                        contentDescription = stringResource(id = R.string.cd_add_new_birthday)
-                    )
-                }
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = stringResource(id = R.string.cd_add_new_birthday)
-                    )
-                }
-            }
-        }) {
-            Column(Modifier.padding(16.dp)) {
-                Text(
-                    modifier = Modifier.paddingFromBaseline(top = 8.dp),
-                    text = "Lorem",
-                    style = MaterialTheme.typography.overline,
-                    color = LocalContentColor.current.copy(
-                        ContentAlpha.medium
-                    )
-                )
-                Text("Lorem", style = MaterialTheme.typography.h6)
-            }
-        }
-    }
-}
-
-
 @Composable
 private fun AddBirthdaySheetComponent(
     nameModel: NameModel,
@@ -241,51 +208,24 @@ private fun AddBirthdaySheetComponent(
                 onCategoryChange = onCategoryChange
             )
         }
-
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun AppBarActionIcon(onCreateEntryClicked: () -> Unit) {
-    IconButton(onClick = onCreateEntryClicked) {
-        Icon(
-            imageVector = Icons.Filled.Check,
-            contentDescription = stringResource(id = R.string.cd_navigate_up),
-            tint = LocalContentColor.current
-        )
-    }
-}
+fun PreviewBirthdateInfo() {
+    BdayTheme {
+        BirthdateInfo(
+            item = BirthdayListViewModel.BirthdateModel(
+                uuid = UUID.randomUUID(),
+                nameModel = NameModel(),
+                dateModel = TimeModel(),
+                categoryModel = CategorySelectionModel()
+            )
+        ) {
 
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun AddFloatingActionButton(
-    onClick: () -> Unit,
-    yOffsetFraction: Float
-) {
-    FloatingActionButton(
-        modifier = Modifier.offset(0.dp, 100.dp * yOffsetFraction),
-        onClick = onClick
-    ) {
-        Icon(
-            imageVector = Icons.Filled.Add,
-            contentDescription = stringResource(id = R.string.cd_add_new_birthday)
-        )
+        }
     }
 }
 
 
-@Composable
-fun AddBirthdayTopBar() {
-    val topBarBackground = MaterialTheme.colors.primary
-    TopAppBar(
-        title = { Text(text = stringResource(id = R.string.app_name)) },
-        backgroundColor = topBarBackground,
-    )
-}
-
-fun Locale.toJavaLocale(): java.util.Locale =
-    java.util.Locale.forLanguageTag(this.toLanguageTag())
-
-fun Month.localizedName(locale: Locale): String =
-    this.getDisplayName(TextStyle.FULL, locale.toJavaLocale())

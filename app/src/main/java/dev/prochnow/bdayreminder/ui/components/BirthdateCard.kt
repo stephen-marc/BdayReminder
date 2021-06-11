@@ -7,19 +7,23 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.prochnow.bdayreminder.R
+import dev.prochnow.bdayreminder.ui.theme.CategoryTheme
+
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -46,9 +50,9 @@ fun BirthdateCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .border(2.dp, MaterialTheme.colors.primary, shape = MaterialTheme.shapes.medium)
-                    .heightIn(backElementOffsetDp),
+                    .heightIn(backElementOffsetDp)
+                    .padding(),
             ) {
-//                CompositionLocalProvider(LocalContentColor provides (MaterialTheme.colors.primary)) {
                 AnimatedVisibility(
                     visible = expanded,
                     exit = shrinkVertically(shrinkTowards = Alignment.Top),
@@ -63,7 +67,6 @@ fun BirthdateCard(
                     }
                 }
             }
-//            }
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -89,6 +92,82 @@ fun BirthdateCard(
         ) {
             backPlaceable.placeRelative(0, backElementOffsetPx)
             topPlaceable.placeRelative(0, 0)
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewBirthdateCardExpanded() {
+    CategoryTheme {
+        BirthdateCard(expanded = true, backContent = {
+            Row(
+                Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = stringResource(id = R.string.cd_add_new_birthday)
+                    )
+                }
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = stringResource(id = R.string.cd_add_new_birthday)
+                    )
+                }
+            }
+        }) {
+            Column(Modifier.padding(16.dp)) {
+                Text(
+                    modifier = Modifier.paddingFromBaseline(top = 8.dp),
+                    text = "Lorem",
+                    style = MaterialTheme.typography.overline,
+                    color = LocalContentColor.current.copy(
+                        ContentAlpha.medium
+                    )
+                )
+                Text("Lorem", style = MaterialTheme.typography.h6)
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewBirthdateCard() {
+    CategoryTheme {
+        BirthdateCard(expanded = false, backContent = {
+            Row(
+                Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = stringResource(id = R.string.cd_add_new_birthday)
+                    )
+                }
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = stringResource(id = R.string.cd_add_new_birthday)
+                    )
+                }
+            }
+        }) {
+            Column(Modifier.padding(16.dp)) {
+                Text(
+                    modifier = Modifier.paddingFromBaseline(top = 8.dp),
+                    text = "Lorem",
+                    style = MaterialTheme.typography.overline,
+                    color = LocalContentColor.current.copy(
+                        ContentAlpha.medium
+                    )
+                )
+                Text("Lorem", style = MaterialTheme.typography.h6)
+            }
         }
     }
 }

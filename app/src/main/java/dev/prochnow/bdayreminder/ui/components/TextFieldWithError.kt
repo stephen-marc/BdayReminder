@@ -10,18 +10,21 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import dev.prochnow.bdayreminder.ui.theme.BdayTheme
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun TextFieldWithError(
+    modifier: Modifier = Modifier,
     value: String,
     isError: Boolean,
     errors: String,
-    modifier: Modifier = Modifier,
     onTextChange: (String) -> Unit,
     interactionSource: MutableInteractionSource = MutableInteractionSource(),
     readOnly: Boolean = false,
     singleLine: Boolean = false,
+    trailingIcon: @Composable() (() -> Unit)? = null,
     label: @Composable() (() -> Unit)? = null,
 ) {
     Column(
@@ -36,6 +39,7 @@ fun TextFieldWithError(
             onValueChange = onTextChange,
             interactionSource = interactionSource,
             readOnly = readOnly,
+            trailingIcon = trailingIcon,
         )
         AnimatedVisibility(visible = isError) {
             Text(
@@ -45,5 +49,33 @@ fun TextFieldWithError(
             )
         }
 
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewTextFieldWithErrorNoError() {
+    BdayTheme {
+        TextFieldWithError(
+            value = "LoremIpum",
+            isError = false,
+            errors = "",
+            onTextChange = {/*TODO*/ }) {
+
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewTextFieldWithError() {
+    BdayTheme {
+        TextFieldWithError(
+            value = "LoremIpum",
+            isError = true,
+            errors = "ErrorText",
+            onTextChange = {/*TODO*/ }) {
+
+        }
     }
 }

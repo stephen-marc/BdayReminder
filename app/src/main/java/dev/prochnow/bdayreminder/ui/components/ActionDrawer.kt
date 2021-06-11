@@ -16,10 +16,12 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.prochnow.bdayreminder.*
 import dev.prochnow.bdayreminder.R
 import dev.prochnow.bdayreminder.ui.get
+import dev.prochnow.bdayreminder.ui.theme.BdayTheme
 import java.util.*
 
 
@@ -195,6 +197,46 @@ private fun ActionDrawerDefault(onEditClick: () -> Unit, onDeleteClick: () -> Un
                 tint = MaterialTheme.colors.error
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewActionDrawerDelete() {
+    BdayTheme {
+        ActionDrawerDelete(
+            uuid = UUID.randomUUID(),
+            name = "Lorem Ipsum",
+            onCancel = {/*TODO*/ },
+            onDelete = {/*TODO*/ })
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewActionDrawerDefault() {
+    BdayTheme {
+        ActionDrawerDefault(
+            onEditClick = {/*TODO*/ },
+            onDeleteClick = {/*TODO*/ }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewActionDrawerEdit() {
+    BdayTheme {
+        ActionDrawerEdit(
+            birthdateModel = BirthdayListViewModel.BirthdateModel(
+                UUID.randomUUID(),
+                NameModel(),
+                TimeModel(),
+                CategorySelectionModel()
+            ),
+            onCancel = {/*TODO*/ },
+            onSave = {/*TODO*/ }
+        )
     }
 }
 

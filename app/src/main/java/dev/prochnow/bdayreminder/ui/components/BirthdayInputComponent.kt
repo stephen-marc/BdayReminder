@@ -8,9 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.prochnow.bdayreminder.*
 import dev.prochnow.bdayreminder.ui.get
+import dev.prochnow.bdayreminder.ui.theme.BdayTheme
 import java.time.LocalDate
 
 @Composable
@@ -46,6 +48,20 @@ fun BirthdayInputComponent(
                 categoryModel = categorySelectionModel,
                 onCategoryClick = onCategoryChange
             )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewBirthdayInputComponent() {
+    BdayTheme {
+        BirthdayInputComponent(
+            nameModel = NameModel(),
+            timeModel = TimeModel(),
+            categorySelectionModel = CategorySelectionModel(),
+            onNameChange = { /*TODO*/ },
+            onDateChange = { /*TODO*/ }) {
         }
     }
 }

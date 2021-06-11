@@ -16,10 +16,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import arrow.optics.optics
-import dev.prochnow.bdayreminder.*
 import dev.prochnow.bdayreminder.R
+import dev.prochnow.bdayreminder.Validatable
 import dev.prochnow.bdayreminder.ui.LocalizedString
 import dev.prochnow.bdayreminder.ui.get
+import dev.prochnow.bdayreminder.utility.localizedName
 import java.time.Month
 
 @optics
@@ -127,7 +128,7 @@ fun DaySelectionDropDown(
                 }
             }
         },
-        text = selectedValue.value.get(LocalContext.current),
+        selectedValue = selectedValue.value.get(LocalContext.current),
         isError = selectedValue.isError,
         errors = selectedValue.errors.get(LocalContext.current)
     )
@@ -161,7 +162,7 @@ fun MonthSelectionDropDown(
                 }
             }
         },
-        text = selectedMonth.value?.localizedName(Locale.current) ?: "",
+        selectedValue = selectedMonth.value?.localizedName(Locale.current) ?: "",
         isError = selectedMonth.isError,
         errors = selectedMonth.errors.get(LocalContext.current)
     )

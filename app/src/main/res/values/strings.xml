@@ -16,4 +16,5 @@
     <string name="error_future_birthdate">Date can not be in the future</string>
     <string name="entry_created">Birthday saved!</string>
     <string name="birthdate_title">%s\'s %dth birthday</string>
+    <string name="cd_show_list_of_elements">Show list of available elements</string>
 </resources>

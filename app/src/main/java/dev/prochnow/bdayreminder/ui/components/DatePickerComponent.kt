@@ -9,12 +9,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.buttons
 import com.vanpra.composematerialdialogs.datetime.datepicker.datepicker
 import dev.prochnow.bdayreminder.R
 import dev.prochnow.bdayreminder.TimeModel
 import dev.prochnow.bdayreminder.ui.get
+import dev.prochnow.bdayreminder.ui.theme.BdayTheme
 import java.time.LocalDate
 
 
@@ -22,8 +24,8 @@ import java.time.LocalDate
 @Composable
 fun DatePickerComponent(
     modifier: Modifier = Modifier,
+    timeModel: TimeModel,
     onDateSelected: (LocalDate) -> Unit,
-    timeModel: TimeModel
 ) {
     val dialog = remember { MaterialDialog() }
     var resetFocusState by remember { mutableStateOf(false) }
@@ -57,4 +59,12 @@ fun DatePickerComponent(
         errors = timeModel.errors.get(LocalContext.current),
         label = { Text(stringResource(id = R.string.date_label)) }
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewDatePickerComponent() {
+    BdayTheme {
+        DatePickerComponent(onDateSelected = { /*TODO*/ }, timeModel = TimeModel())
+    }
 }
